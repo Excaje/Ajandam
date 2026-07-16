@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#101014" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
+  <meta name="description" content="Kişisel ajanda, notlar ve şifre kasası">
+  <title>Ajandam</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Üst çubuk -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="app-logo">🗓️</span>
+        <h1 id="page-title">Ajanda</h1>
+      </div>
+      <div class="topbar-right">
+        <span id="sync-status" class="sync-status" title="Eşitleme durumu"></span>
+        <button id="btn-search" class="icon-btn" title="Ara">🔍</button>
+        <button id="btn-theme" class="icon-btn" title="Tema değiştir">🌓</button>
+      </div>
+    </header>
+
+    <!-- Arama çubuğu -->
+    <div id="search-bar" class="search-bar hidden">
+      <input type="search" id="search-input" placeholder="Etkinlik ve notlarda ara…" autocomplete="off">
+      <button id="search-close" class="icon-btn">✕</button>
+    </div>
+    <div id="search-results" class="search-results hidden"></div>
+
+    <!-- Ana içerik -->
+    <main id="main">
+      <!-- AJANDA -->
+      <section id="view-calendar" class="view">
+        <div class="cal-toolbar">
+          <div class="cal-nav">
+            <button id="cal-prev" class="icon-btn">‹</button>
+            <button id="cal-today" class="btn btn-ghost">Bugün</button>
+            <button id="cal-next" class="icon-btn">›</button>
+          </div>
+          <h2 id="cal-title" class="cal-title"></h2>
+          <div class="cal-views">
+            <button data-calview="day"   class="seg-btn">Gün</button>
+            <button data-calview="week"  class="seg-btn">Hafta</button>
+            <button data-calview="month" class="seg-btn active">Ay</button>
+            <button data-calview="year"  class="seg-btn">Yıl</button>
+          </div>
+        </div>
+        <div id="cal-body" class="cal-body"></div>
+      </section>
+
+      <!-- NOTLAR -->
+      <section id="view-notes" class="view hidden">
+        <div id="notes-list" class="notes-grid"></div>
+        <p id="notes-empty" class="empty-msg hidden">Henüz not yok. Sağ alttaki + ile ilk notunu ekle.</p>
+      </section>
+
+      <!-- KASA -->
+      <section id="view-vault" class="view hidden">
+        <div id="vault-locked" class="vault-lock-screen">
+          <div class="lock-icon">🔒</div>
+          <h2 id="vault-lock-title">Kasa Kilitli</h2>
+          <p id="vault-lock-desc">Parolalarına erişmek için ana parolanı gir.</p>
+          <form id="vault-unlock-form" class="lock-form">
+            <input type="password" id="vault-password" placeholder="Ana parola" autocomplete="current-password" required>
+            <input type="password" id="vault-password2" class="hidden" placeholder="Ana parola (tekrar)" autocomplete="new-password">
+            <button type="submit" class="btn btn-primary" id="vault-unlock-btn">Kilidi Aç</button>
+            <p id="vault-error" class="form-error"></p>
+          </form>
+        </div>
+        <div id="vault-open" class="hidden">
+          <div class="vault-toolbar">
+            <input type="search" id="vault-filter" placeholder="Kasada ara…">
+            <button id="vault-lock-now" class="btn btn-ghost">🔒 Kilitle</button>
+          </div>
+          <div id="vault-list" class="vault-list"></div>
+          <p id="vault-empty" class="empty-msg hidden">Kasa boş. Sağ alttaki + ile ilk kaydını ekle.</p>
+        </div>
+      </section>
+
+      <!-- AYARLAR -->
+      <section id="view-settings" class="view hidden">
+        <div id="settings-body" class="settings-body"></div>
+      </section>
+    </main>
+
+    <!-- Alt / yan gezinme -->
+    <nav class="navbar">
+      <button data-nav="calendar" class="nav-btn active"><span class="nav-ico">🗓️</span><span>Ajanda</span></button>
+      <button data-nav="notes"    class="nav-btn"><span class="nav-ico">📝</span><span>Notlar</span></button>
+      <button data-nav="vault"    class="nav-btn"><span class="nav-ico">🔐</span><span>Kasa</span></button>
+      <button data-nav="settings" class="nav-btn"><span class="nav-ico">⚙️</span><span>Ayarlar</span></button>
+    </nav>
+
+    <!-- Yeni ekle düğmesi -->
+    <button id="fab" class="fab" title="Ekle">＋</button>
+
+    <!-- Genel modal -->
+    <div id="modal-backdrop" class="modal-backdrop hidden">
+      <div id="modal" class="modal" role="dialog" aria-modal="true"></div>
+    </div>
+
+    <!-- Alarm katmanı -->
+    <div id="alarm-overlay" class="alarm-overlay hidden">
+      <div class="alarm-box">
+        <div class="alarm-ico">⏰</div>
+        <h2 id="alarm-title"></h2>
+        <p id="alarm-time"></p>
+        <button id="alarm-stop" class="btn btn-primary btn-lg">Alarmı Durdur</button>
+      </div>
+    </div>
+
+    <!-- Bildirimler (toast) -->
+    <div id="toasts" class="toasts"></div>
+  </div>
+
+  <script src="js/util.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/crypto.js"></script>
+  <script src="js/notify.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/vault.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
