@@ -65,7 +65,7 @@ const App = (() => {
         el.className = "search-hit";
         el.innerHTML = `<div class="hit-type">🗓️ Etkinlik</div>
           <div class="hit-title">${escapeHtml(ev.title)}</div>
-          <div class="hit-sub">${trDateLong(ev.date)}${ev.time ? " · " + ev.time : ""}${ev.recur !== "none" ? " · " + Calendar.RECUR_TR[ev.recur] : ""}</div>`;
+          <div class="hit-sub">${trDateLong(ev.date)}${ev.time ? " · " + ev.time + (ev.endTime ? "–" + ev.endTime : "") : ""}${ev.recur !== "none" ? " · " + Calendar.RECUR_TR[ev.recur] : ""}</div>`;
         el.onclick = () => { closeSearch(); show("calendar"); Calendar.gotoDate(ev.date); };
         results.appendChild(el);
       }

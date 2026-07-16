@@ -146,9 +146,10 @@ const Calendar = (() => {
           ev.alarm ? "⏰" : (ev.remind != null && ev.remind !== "" ? "🔔" : ""),
           ev.images?.length ? "🖼️" : ""
         ].filter(Boolean).join(" ");
+        const timeLabel = ev.time ? (ev.endTime ? `${ev.time}–${ev.endTime}` : ev.time) : "—";
         html += `<div class="event-row" data-ev="${ev.id}" data-date="${day}">
           <span class="ev-dot" style="background:${ev.color}"></span>
-          <span class="ev-time">${ev.time || "—"}</span>
+          <span class="ev-time">${timeLabel}</span>
           <span class="ev-name">${escapeHtml(ev.title)}</span>
           <span class="ev-flags">${flags}</span>
         </div>`;
@@ -211,7 +212,7 @@ const Calendar = (() => {
     if (evId && !ev) ev = await DB.get("events", evId);
     const isNew = !ev;
     ev = ev || {
-      id: uid(), title: "", desc: "", date: dateStr || cursor, time: "",
+      id: uid(), title: "", desc: "", date: dateStr || cursor, time: "", endTime: "",
       recur: "none", recurEnd: "", remind: "", alarm: false,
       color: COLORS[0], images: []
     };
@@ -221,9 +222,10 @@ const Calendar = (() => {
       <h2>${isNew ? "Yeni Etkinlik" : "Etkinliği Düzenle"} <button class="close-x">✕</button></h2>
       <form id="ev-form" class="form-grid">
         <div><label>Başlık</label><input type="text" id="ev-title" required maxlength="120" value="${escapeHtml(ev.title)}" placeholder="Ne yapılacak?"></div>
+        <div><label>Tarih</label><input type="date" id="ev-date" required value="${ev.date}"></div>
         <div class="form-row2">
-          <div><label>Tarih</label><input type="date" id="ev-date" required value="${ev.date}"></div>
-          <div><label>Saat (isteğe bağlı)</label><input type="time" id="ev-time" value="${ev.time || ""}"></div>
+          <div><label>Başlangıç saati (isteğe bağlı)</label><input type="time" id="ev-time" value="${ev.time || ""}"></div>
+          <div><label>Bitiş saati (isteğe bağlı)</label><input type="time" id="ev-endtime" value="${ev.endTime || ""}"></div>
         </div>
         <div class="form-row2">
           <div><label>Tekrar</label>
@@ -299,6 +301,7 @@ const Calendar = (() => {
         desc: $("#ev-desc").value.trim(),
         date: $("#ev-date").value,
         time: $("#ev-time").value || "",
+        endTime: $("#ev-endtime").value || "",
         recur: $("#ev-recur").value,
         recurEnd: $("#ev-recur").value === "none" ? "" : $("#ev-recur-end").value,
         remind: remindVal === "" ? "" : Number(remindVal),
@@ -306,7 +309,13 @@ const Calendar = (() => {
         color, images: att.ids
       };
       if ((obj.remind !== "" || obj.alarm) && !obj.time) {
-        toast("Hatırlatıcı için saat girmelisin"); return;
+        toast("Hatırlatıcı için başlangıç saati girmelisin"); return;
+      }
+      if (obj.endTime && !obj.time) {
+        toast("Bitiş saati için önce başlangıç saati gir"); return;
+      }
+      if (obj.endTime && obj.endTime <= obj.time) {
+        toast("Bitiş saati başlangıçtan sonra olmalı"); return;
       }
       await AttachUI.commitRemovals(att);
       await DB.save("events", obj);

@@ -1,7 +1,7 @@
 /* Ajandam — servis çalışanı: çevrimdışı çalışma + bildirim tıklama */
 "use strict";
 
-const CACHE = "ajandam-v2";
+const CACHE = "ajandam-v3";
 const SHELL = [
   "./", "index.html", "manifest.webmanifest",
   "css/style.css",
